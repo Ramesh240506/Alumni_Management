@@ -1,2 +1,2 @@
-package com.yourorg.alumni.entity; 
+package com.example.alumni.entity; 
 public class Event {} 
