@@ -1,42 +1,28 @@
 package com.example.alumni.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.ToString;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+import lombok.Data;
 
 @Entity
 @Table(name = "audit_log")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Data
 public class AuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "logid")
     private Long logId;
 
-    @Column(nullable = false)
-    private UUID targetRecordId; // The ID of the record being audited
+    @Column(name = "targetRecordId", length = 36)
+    private String targetRecordId; 
 
-    @Column(nullable = false)
-    private String recordType; // e.g., "AlumniProfile", "AcademicRecord", "WorkExperience"
+    @Column(name = "recordType", length = 50)
+    private String recordType;
 
-    @Column(nullable = false)
-    private String action; // e.g., "CREATE", "UPDATE", "DELETE", "VERIFY"
+    @Column(name = "action", length = 50)
+    private String action;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "action_by_user_id", nullable = false)
-    @ToString.Exclude // Exclude to prevent potential StackOverflowError with bi-directional relationships
+    @JoinColumn(name = "actionByUserld")
     private User actionByUser;
-
-    @Column(nullable = false)
-    private LocalDateTime timestamp;
 }

@@ -1,48 +1,31 @@
 package com.example.alumni.entity;
-
+import com.example.alumni.entity.enums.RecordStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.ToString;
-
-import java.util.UUID;
+import lombok.Data;
 
 @Entity
 @Table(name = "academic_record")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@Data
 public class AcademicRecord {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID recordId;
+    @Column(name = "recordid", nullable = false, length = 36)
+    private String recordId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "alumni_user_id", nullable = false)
-    @ToString.Exclude // Exclude to prevent potential StackOverflowError
-    private AlumniProfile alumniUser;
+    @JoinColumn(name = "alumniUserld", nullable = false)
+    private AlumniProfile alumniProfile;
 
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "college_id", nullable = false)
-    @ToString.Exclude // Exclude to prevent potential StackOverflowError
+    @JoinColumn(name = "collegeld", nullable = false)
     private College college;
 
-    @Column(nullable = false)
+
+    @Column(name = "degreeName", length = 255)
     private String degreeName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RecordStatus status; // ENUM: PENDING, VERIFIED, REJECTED
-
-    // Enum for Record Status
-    public enum RecordStatus {
-        PENDING,
-        VERIFIED,
-        REJECTED
-    }
+    @Column(name = "status", nullable = false)
+    private RecordStatus status;
 }
