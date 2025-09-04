@@ -2,31 +2,39 @@ package com.example.alumni.entity;
 
 import com.example.alumni.entity.enums.ConnectionStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "connection")
-@Data
+@Table(name = "Connections")
+@IdClass(ConnectionId.class)
+@Getter
+@Setter
 public class Connection {
 
     @Id
-    @Column(name = "requesterld", length = 36)
+    @Column(name = "requesterId", length = 36)
     private String requesterId;
 
     @Id
-    @Column(name = "approverld", length = 36)
+    @Column(name = "approverId", length = 36)
     private String approverId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requesterld", insertable = false, updatable = false)
-    private User requester;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approverld", insertable = false, updatable = false)
-    private User approver;
-
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ConnectionStatus status;
+    private ConnectionStatus status = ConnectionStatus.PENDING;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requesterId", insertable = false, updatable = false)
+    private User requester;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approverId", insertable = false, updatable = false)
+    private User approver;
 }
