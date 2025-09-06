@@ -5,7 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.time.LocalDate;
+
+// The unnecessary 'import java.util.UUID;' has been removed.
 
 /**
  * DTO for the request body when a Course Provider adds a completed course for an alumnus.
@@ -16,13 +18,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CourseRequest {
 
-    // The ID of the alumnus for whom the course is being added.
-    private UUID alumniUserId;
+    // THE FIX IS HERE: The type has been changed from UUID to String
+    // to match your User and AlumniProfile entity's primary key.
+    private String alumniUserId;
 
-    // The name of the course or certification.
     private String courseName;
 
-    // The provider's ID would be inferred from the authenticated user in a real scenario.
-    // We can add it here if the API requires it explicitly.
-    // private UUID providerId;
+    // Added this field to match the 'completion_date' field in your ProfessionalCourse entity.
+    private LocalDate completionDate;
 }

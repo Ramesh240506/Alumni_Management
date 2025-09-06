@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+// The unnecessary 'import java.util.UUID;' has been removed.
 
 /**
  * DTO for returning details of a professional course record after an API operation
@@ -18,7 +18,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CourseResponse {
 
-    private UUID courseRecordId;
+    // THE FIX IS HERE: The type has been changed from UUID to String
+    // to match your ProfessionalCourse entity's primary key.
+    private String courseRecordId;
 
     private String courseName;
 
