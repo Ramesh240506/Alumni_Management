@@ -1,70 +1,37 @@
 package com.example.alumni.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-/**
- * Represents a single one-to-one message sent between two users in the system.
- */
+import java.util.UUID;
+
 @Entity
-@Table(name = "Messages")
-@Getter
-@Setter
+@Table(name = "message")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Message {
-
-    /**
-     * The unique identifier for the message, generated automatically by the database.
-     */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "messageId")
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Assuming auto-increment for BIGINT
     private Long messageId;
 
-    /**
-     * The text content of the message.
-     */
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false)
+    private UUID sender; // FK to User
+
+    @Column(nullable = false)
+    private UUID receiver; // FK to User
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    /**
-     * The timestamp when the message was created.
-     * Automatically set by Hibernate when the entity is first saved.
-     */
-    @CreationTimestamp
-    @Column(name = "sent_at", nullable = false, updatable = false)
-    private LocalDateTime sentAt;
+    @Column(nullable = false)
+    private Instant timestamp; // Added for ordering conversations
 
-    /**
-     * The timestamp when the message was marked as read by the receiver.
-     * This will be null until the receiver reads the message.
-     */
-    @Column(name = "read_at")
-    private LocalDateTime readAt;
-
-    // --- Relationships ---
-
-    /**
-     * The user who sent the message.
-     * This is a lazy-loaded relationship for performance.
-     * IMPORTANT: The database foreign key for 'senderId' should be configured with
-     * 'ON DELETE SET NULL' to preserve message history if a user is deleted.
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "senderId")
-    private User sender;
-
-    /**
-     * The user who received the message.
-     * This is a lazy-loaded relationship for performance.
-     * IMPORTANT: The database foreign key for 'receiverId' should be configured with
-     * 'ON DELETE SET NULL' to preserve message history if a user is deleted.
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiverId")
-    private User receiver;
-
+   
 }
