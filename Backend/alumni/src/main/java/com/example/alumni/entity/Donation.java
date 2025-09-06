@@ -78,4 +78,6 @@ public class Donation {
             this.donationId = UUID.randomUUID().toString();
         }
     }
+
+
 }
