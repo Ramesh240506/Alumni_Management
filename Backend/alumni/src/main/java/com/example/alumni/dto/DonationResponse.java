@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -14,7 +15,18 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DonationResponse {
     private UUID donationId;
-    private UUID campaignId;
-    private UUID donorUserId;
     private BigDecimal amount;
+    private boolean isAnonymous;
+    private LocalDateTime donatedAt;
+    private UUID donorUserId;
+    private CampaignInfo campaign;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CampaignInfo {
+        private UUID campaignId;
+        private String title;
+    }
 }
