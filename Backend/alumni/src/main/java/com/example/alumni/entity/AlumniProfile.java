@@ -1,5 +1,6 @@
 package com.example.alumni.entity;
 
+import com.example.alumni.entity.enums.VerificationStatus; // <-- Make sure to add this import
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,14 +13,14 @@ import java.util.Set;
  * This entity has a one-to-one relationship with the User entity, sharing the same primary key.
  */
 @Entity
-@Table(name = "Alumni_Profiles") // Matching the schema name convention
+@Table(name = "Alumni_Profiles")
 @Getter
 @Setter
-@ToString(exclude = {"user", "college", "workExperiences", "professionalCourses", "academicRecords", "digitalId", "eventRsvps"}) // Exclude lazy fields from ToString to prevent errors
+@ToString(exclude = {"user", "college", "workExperiences", "professionalCourses", "academicRecords", "digitalId", "eventRsvps"})
 public class AlumniProfile {
 
     @Id
-    @Column(name = "alumniUserId", length = 36) // CORRECTED: Was "alumniUserld"
+    @Column(name = "alumniUserId", length = 36)
     private String alumniUserId;
 
     @Column(name = "firstName", length = 100, nullable = false)
@@ -31,30 +32,32 @@ public class AlumniProfile {
     @Column(name = "phone", length = 20, unique = true)
     private String phone;
 
+    // --- FIELD TO ADD BACK ---
+    /**
+     * Tracks the verification status of the alumni profile, managed by a college administrator.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verificationStatus", length = 30, nullable = false)
+    private VerificationStatus verificationStatus = VerificationStatus.PENDING_APPROVAL;
+    // -------------------------
+
     @Column(name = "privacySettings", columnDefinition = "JSON")
     private String privacySettings;
 
-    // --- Relationships ---
 
-    /**
-     * One-to-One with User, sharing the primary key.
-     * @MapsId tells JPA that this entity's ID comes from this relationship.
-     */
+    // --- Relationships ---
+    
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "alumniUserId") // CORRECTED: Was "alumniUserld"
+    @JoinColumn(name = "alumniUserId")
     private User user;
-
-    /**
-     * The College to which this alumnus belongs.
-     */
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collegeId", nullable = false) // CORRECTED: Was "collegeld"
+    @JoinColumn(name = "collegeId", nullable = false)
     private College college;
     
     // --- Inverse Relationships (for navigation) ---
 
-    // Using Set instead of List is a best practice for "to-many" relationships
     @OneToMany(mappedBy = "alumniProfile", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<WorkExperience> workExperiences;
     

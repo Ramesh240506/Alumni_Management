@@ -1,17 +1,17 @@
 package com.example.alumni.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-public class AlumniProfileResponse {
-    private UUID userId;
+@NoArgsConstructor
+@AllArgsConstructor
+public class PendingAlumniDto {
+    private String alumniUserId;
     private String firstName;
     private String lastName;
     private String email;
-    private String collegeName;
-    private String verificationStatus;
 }

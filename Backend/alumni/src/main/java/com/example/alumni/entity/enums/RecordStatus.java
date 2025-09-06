@@ -6,4 +6,5 @@ public enum RecordStatus {
     VERIFIED,           // Fully verified and locked
     REJECTED,           // The request was rejected by an authority
     DISPUTED            // A verified record has been flagged for review
+, APPROVED, PENDING_APPROVAL
 }

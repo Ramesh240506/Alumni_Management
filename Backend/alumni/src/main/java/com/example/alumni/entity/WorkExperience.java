@@ -57,4 +57,9 @@ public class WorkExperience {
             this.experienceId = java.util.UUID.randomUUID().toString();
         }
     }
+
+    public String getCompanyName() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getCompanyName'");
+    }
 }

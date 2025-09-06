@@ -1,7 +1,10 @@
 package com.example.alumni.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -17,6 +20,9 @@ import java.util.UUID;
 @Table(name = "Events")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor 
 public class Event {
 
     @Id
@@ -46,29 +52,18 @@ public class Event {
     private LocalDateTime createdAt;
 
     // --- Relationships ---
-
-    /**
-     * The College that is hosting this event.
-     * Every event must be associated with one college.
-     */
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "collegeId", nullable = false)
     private College college;
-
-    /**
-     * The set of all RSVPs made for this event.
-     * This defines the "one" side of the One-to-Many relationship with EventRsvp.
-     * CascadeType.ALL is used because RSVPs are meaningless without the event. If the event
-     * is deleted, all its RSVPs should be deleted too.
-     */
+    
     @OneToMany(
-        mappedBy = "event", // Refers to the 'event' field in the EventRsvp entity
+        mappedBy = "event",
         cascade = CascadeType.ALL,
         fetch = FetchType.LAZY,
         orphanRemoval = true
     )
     private Set<EventRsvp> rsvps;
-
 
     @PrePersist
     public void prePersist() {
@@ -76,4 +71,6 @@ public class Event {
             this.eventId = UUID.randomUUID().toString();
         }
     }
+
+    // The conflicting builder() method has been REMOVED.
 }
