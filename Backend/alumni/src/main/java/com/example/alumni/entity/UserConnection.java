@@ -8,22 +8,22 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Connections")
+@Table(name = "connections") // The database table name remains 'connections'
 @IdClass(ConnectionId.class)
 @Getter
 @Setter
-public class Connection {
+public class UserConnection { // <-- CLASS RENAMED
 
     @Id
-    @Column(name = "requesterId", length = 36)
+    @Column(name = "requester_id")
     private String requesterId;
 
     @Id
-    @Column(name = "approverId", length = 36)
+    @Column(name = "approver_id")
     private String approverId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(nullable = false)
     private ConnectionStatus status = ConnectionStatus.PENDING;
 
     @CreationTimestamp
@@ -31,10 +31,10 @@ public class Connection {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requesterId", insertable = false, updatable = false)
+    @JoinColumn(name = "requester_id", insertable = false, updatable = false)
     private User requester;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approverId", insertable = false, updatable = false)
+    @JoinColumn(name = "approver_id", insertable = false, updatable = false)
     private User approver;
 }

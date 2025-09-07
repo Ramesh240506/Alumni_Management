@@ -25,7 +25,11 @@ public class JwtUtil {
     @Value("${app.jwt.expiration-ms}")
     private long jwtExpirationMs;
 
-    private Key getSigningKey() {
+      private Key getSigningKey() {
+        // This debug line will print the secret key to your console when the app starts.
+        // Make sure it matches the one in your application.properties file.
+        System.out.println("--- [JWT UTIL] Using JWT Secret Key: " + secret + " ---");
+        
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }

@@ -1,16 +1,12 @@
 package com.example.alumni.dto;
 
 import com.example.alumni.entity.enums.ConnectionStatus;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ConnectionRequest {
-    @NotBlank(message = "Target user ID is required")
-    private String targetUserId;
+public class ConnectionResponseRequest {
 
-    // This field is used when responding to a request
     @NotNull(message = "A status (ACCEPTED or REJECTED) is required to respond to a request")
     private ConnectionStatus status;
 }

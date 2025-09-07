@@ -6,12 +6,14 @@ import com.example.alumni.dto.RegisterRequest;
 import com.example.alumni.dto.VerifyOtpRequest;
 import com.example.alumni.entity.AlumniProfile;
 import com.example.alumni.entity.College;
+import com.example.alumni.entity.DigitalId;
 import com.example.alumni.entity.User;
 import com.example.alumni.entity.enums.UserRole;
 import com.example.alumni.exception.ConflictException;
 import com.example.alumni.exception.NotFoundException;
 import com.example.alumni.repository.AlumniProfileRepository;
 import com.example.alumni.repository.CollegeRepository;
+import com.example.alumni.repository.DigitalIdRepository;
 import com.example.alumni.repository.UserRepository;
 import com.example.alumni.security.JwtUtil;
 import com.example.alumni.service.AuthService;
@@ -25,22 +27,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final AlumniProfileRepository alumniProfileRepository;
-    private final CollegeRepository collegeRepository; // Injected for registration
+    private final CollegeRepository collegeRepository;
+    private final DigitalIdRepository digitalIdRepository; // Injected for registration
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final AadhaarOtpValidator aadhaarOtpValidator;
 
     /**
-     * Registers a new alumni user. This involves creating a User record and an associated
-     * AlumniProfile linked to a specific College. The user is initially created in an
-     * inactive state pending Aadhaar OTP verification.
+     * Registers a new alumni user. This involves creating a User, an associated AlumniProfile,
+     * and a DigitalId. The user is initially created in an inactive state pending OTP verification.
+     * The relationships are managed via cascading from the User entity.
      *
      * @param request The registration data from the DTO, including the collegeId.
      * @throws ConflictException if a user with the given email already exists.
@@ -54,8 +59,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ConflictException("User with email " + request.getEmail() + " already exists.");
         }
 
-        // 2. Fetch the College entity from the database using the ID from the request.
-        // This ensures the alumnus is associated with a valid, existing college.
+        // 2. Fetch the College entity.
         College college = collegeRepository.findById(request.getCollegeId())
                 .orElseThrow(() -> new NotFoundException("College not found with ID: " + request.getCollegeId()));
 
@@ -64,22 +68,30 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserRole.ALUMNI);
-        user.setActive(false); // User remains inactive until OTP verification.
+        user.setActive(false);
 
         // 4. Create the associated AlumniProfile.
         AlumniProfile alumniProfile = new AlumniProfile();
         alumniProfile.setFirstName(request.getFirstName());
         alumniProfile.setLastName(request.getLastName());
-        alumniProfile.setCollege(college); // Set the fetched College entity.
+        alumniProfile.setCollege(college);
 
-        // 5. Link the User and AlumniProfile entities together bidirectionally.
-        user.setAlumniProfile(alumniProfile);
+        // 5. *** NEW LOGIC: Create the DigitalId for the new user. ***
+        DigitalId digitalId = new DigitalId();
+        digitalId.setIdToken(UUID.randomUUID().toString()); // Generate a simple unique token for the ID
+        digitalId.setAlumniProfile(alumniProfile);
+
+        // 6. Link all the entities together bidirectionally.
+        alumniProfile.setDigitalId(digitalId);
         alumniProfile.setUser(user);
+        user.setAlumniProfile(alumniProfile);
 
-        // 6. Save the User entity. Thanks to CascadeType.ALL, the linked AlumniProfile will be saved automatically.
+
+        // 7. Save ONLY the User entity. CascadeType.ALL will automatically save the linked
+        //    AlumniProfile and the linked DigitalId in the correct order.
         userRepository.save(user);
 
-        // 7. Trigger the Aadhaar OTP verification process.
+        // 8. Trigger the Aadhaar OTP verification process.
         aadhaarOtpValidator.sendOtp(user, request.getAadhaarNumber());
     }
 

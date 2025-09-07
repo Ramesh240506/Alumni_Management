@@ -15,27 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
-/**
- * A filter that intercepts every HTTP request to validate the JWT token.
- * It ignores public paths and sets the user's authentication in the security context
- * if a valid token is found.
- */
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-
-    // A list of path prefixes that should be publicly accessible without a JWT.
-    private static final List<String> PUBLIC_PATH_PREFIXES = Arrays.asList(
-        "/auth",
-        "/swagger-ui",
-        "/v3/api-docs"
-    );
 
     @Override
     protected void doFilterInternal(
@@ -44,55 +30,53 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // Get the path of the request, excluding the application's context path.
-        final String path = request.getRequestURI().substring(request.getContextPath().length());
-
-        // Check if the request path starts with any of the public prefixes.
-        boolean isPublicPath = PUBLIC_PATH_PREFIXES.stream().anyMatch(path::startsWith);
-        if (isPublicPath) {
-            filterChain.doFilter(request, response); // If it's public, skip the rest of the filter.
-            return;
-        }
+        // This should run for every request
+        System.out.println("\n--- [JWT FILTER] Processing request for: " + request.getRequestURI() + " ---");
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
 
-        // --- THIS IS THE FIX ---
-        // If there is no token, pass the request to the next filter AND STOP.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return; // <<<<<<<<<<<<<<<< ADD THIS LINE
-        }
-
-        // If there's no "Bearer" token, pass the request on. The AuthorizationFilter later will deny access.
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("--- [JWT FILTER] No JWT Token found. Passing to next filter. ---");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extract the token and user's email.
-        jwt = authHeader.substring(7);
-        userEmail = jwtUtil.extractUsername(jwt);
+        final String jwt = authHeader.substring(7);
+        String userEmail = null;
 
-        // If a user is found and is not already authenticated in the current context...
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            
-            // ... and if the token is valid for this user...
-            if (jwtUtil.isTokenValid(jwt, userDetails)) {
-                // ... create an authentication token and set it in the Security Context.
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null, // Credentials are not needed as we use the token
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+        try {
+            userEmail = jwtUtil.extractUsername(jwt);
+            System.out.println("--- [JWT FILTER] Extracted username from token: " + userEmail + " ---");
+        } catch (Exception e) {
+            // This will tell us if the token is expired or malformed
+            System.err.println("--- [JWT FILTER] ERROR: Could not extract username. Token might be invalid. Error: " + e.getMessage() + " ---");
+            filterChain.doFilter(request, response);
+            return;
         }
-        
-        // Pass the request on to the next filter in the chain.
+
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            System.out.println("--- [JWT FILTER] User '" + userEmail + "' is not yet authenticated. Loading details...");
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+
+            try {
+                if (jwtUtil.isTokenValid(jwt, userDetails)) {
+                    System.out.println("--- [JWT FILTER] SUCCESS: Token is valid for user '" + userEmail + "'. Setting authentication context. ---");
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                     System.err.println("--- [JWT FILTER] ERROR: Token is considered INVALID by isTokenValid() method. ---");
+                }
+            } catch (Exception e) {
+                 // This will tell us if the signature is wrong
+                 System.err.println("--- [JWT FILTER] ERROR: Exception during token validation. Secret key might be wrong. Error: " + e.getMessage() + " ---");
+            }
+        } else {
+             System.out.println("--- [JWT FILTER] User is already authenticated. Skipping. ---");
+        }
+
         filterChain.doFilter(request, response);
     }
 }

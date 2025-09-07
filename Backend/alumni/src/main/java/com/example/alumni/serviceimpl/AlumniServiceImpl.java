@@ -11,6 +11,9 @@ import com.example.alumni.service.AlumniService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,27 +82,27 @@ public class AlumniServiceImpl implements AlumniService {
                 .collect(Collectors.toList());
     }
 
-    // --- THIS IS THE HACKATHON-MODE HELPER METHOD ---
+    // --- THIS IS THE FINAL, SECURE HELPER METHOD ---
     /**
-     * Retrieves the currently authenticated User from the database.
-     * HACKATHON MODE: Since security is disabled, this method is hardcoded to return
-     * a specific test user ('rahul.sharma@example.com') to allow for testing of protected endpoints.
-     * @return The hardcoded test User entity.
+     * Retrieves the currently authenticated User from the database by reading the
+     * security context established by the JwtFilter.
+     * @return The authenticated User entity.
      */
     private User getCurrentUser() {
-        System.out.println("\n--- [HACKATHON MODE] getCurrentUser() is returning a hardcoded test user. ---\n");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new IllegalStateException("User is not authenticated. Cannot perform this action.");
+        }
 
-        // This email MUST exist in your database from the dummy data script.
-        String testUserEmail = "rahul.sharma@example.com";
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
 
-        return userRepository.findByEmail(testUserEmail)
-                .orElseThrow(() -> new NotFoundException("HACKATHON TEST USER NOT FOUND: The user '" + testUserEmail + "' does not exist in the database. Please run the dummy data script."));
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + username));
     }
-    // --- END OF HACKATHON-MODE HELPER METHOD ---
+    // --- END OF SECURE HELPER METHOD ---
 
     private AlumniProfileResponse mapToAlumniProfileResponse(AlumniProfile profile) {
-        // Lazy loading requires the college to be fetched within a transaction or with an EAGER fetch.
-        // For simplicity, we assume it's available.
         AlumniProfileResponse.CollegeDto collegeDto = AlumniProfileResponse.CollegeDto.builder()
                 .collegeId(profile.getCollege().getCollegeId())
                 .name(profile.getCollege().getName())
