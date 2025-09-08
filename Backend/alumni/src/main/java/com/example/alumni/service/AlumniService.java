@@ -1,5 +1,6 @@
 package com.example.alumni.service;
 
+import com.example.alumni.dto.AlumniNetworkResponse; // <-- NEW IMPORT
 import com.example.alumni.dto.AlumniProfileRequest;
 import com.example.alumni.dto.AlumniProfileResponse;
 import com.example.alumni.dto.DigitalIdResponse;
@@ -16,20 +17,23 @@ public interface AlumniService {
 
     /**
      * Updates the profile of the currently authenticated alumnus.
-     * @param request DTO containing the fields to update.
-     * @return The updated alumni profile.
      */
     AlumniProfileResponse updateCurrentAlumniProfile(AlumniProfileRequest request);
 
     /**
      * Retrieves the Digital ID for the currently authenticated alumnus.
-     * @return A DTO containing the Digital ID information.
      */
     DigitalIdResponse getDigitalIdForCurrentUser();
 
     /**
      * Retrieves the donation history for the currently authenticated alumnus.
-     * @return A list of DTOs representing the user's past donations.
      */
     List<DonationResponse> getDonationHistoryForCurrentUser();
+
+    // --- THIS IS THE MISSING METHOD DECLARATION ---
+    /**
+     * Retrieves the network of alumni from the same college as the current user.
+     * @return A list of alumni network profiles.
+     */
+    List<AlumniNetworkResponse> getAlumniNetwork();
 }

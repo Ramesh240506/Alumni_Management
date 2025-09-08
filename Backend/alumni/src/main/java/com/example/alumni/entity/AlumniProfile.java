@@ -12,52 +12,51 @@ import java.util.Set;
  * This entity has a one-to-one relationship with the User entity, sharing the same primary key.
  */
 @Entity
-@Table(name = "Alumni_Profiles") // Matching the schema name convention
+@Table(name = "alumni_profiles") // Aligns with JPA's snake_case naming strategy
 @Getter
 @Setter
-@ToString(exclude = {"user", "college", "workExperiences", "professionalCourses", "academicRecords", "digitalId", "eventRsvps"}) // Exclude lazy fields from ToString to prevent errors
+@ToString(exclude = {"user", "college", "workExperiences", "professionalCourses", "academicRecords", "digitalId", "eventRsvps"})
 public class AlumniProfile {
 
     @Id
-    @Column(name = "alumniUserId", length = 36) // CORRECTED: Was "alumniUserld"
+    @Column(name = "alumni_user_id", length = 36)
     private String alumniUserId;
 
-    @Column(name = "firstName", length = 100, nullable = false)
+    @Column(name = "first_name", length = 100, nullable = false)
     private String firstName;
 
-    @Column(name = "lastName", length = 100, nullable = false)
+    @Column(name = "last_name", length = 100, nullable = false)
     private String lastName;
 
-    @Column(name = "phone", length = 20, unique = true)
+    @Column(length = 20, unique = true)
     private String phone;
+    
+    @Column(name = "current_city", length = 100)
+    private String currentCity;
+    
+    @Column(name = "current_country", length = 100)
+    private String currentCountry;
+    
+    @Column(columnDefinition = "TEXT")
+    private String bio;
 
-    @Column(name = "privacySettings", columnDefinition = "JSON")
+    @Column(name = "privacy_settings", columnDefinition = "JSON")
     private String privacySettings;
 
     // --- Relationships ---
 
-    /**
-     * One-to-One with User, sharing the primary key.
-     * @MapsId tells JPA that this entity's ID comes from this relationship.
-     */
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "alumniUserId") // CORRECTED: Was "alumniUserld"
+    @JoinColumn(name = "alumni_user_id")
     private User user;
 
-    /**
-     * The College to which this alumnus belongs.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collegeId", nullable = false) // CORRECTED: Was "collegeld"
+    @JoinColumn(name = "college_id", nullable = false)
     private College college;
-    
-    // --- Inverse Relationships (for navigation) ---
 
-    // Using Set instead of List is a best practice for "to-many" relationships
     @OneToMany(mappedBy = "alumniProfile", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<WorkExperience> workExperiences;
-    
+
     @OneToMany(mappedBy = "alumniProfile", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<ProfessionalCourse> professionalCourses;
 

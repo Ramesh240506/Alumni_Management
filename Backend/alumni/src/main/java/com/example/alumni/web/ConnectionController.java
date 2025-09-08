@@ -2,10 +2,14 @@ package com.example.alumni.web;
 
 import com.example.alumni.dto.ApiResponse;
 import com.example.alumni.dto.ConnectionRequest;
+import com.example.alumni.dto.ConnectionResponse;
 import com.example.alumni.dto.ConnectionResponseRequest;
 import com.example.alumni.service.ConnectionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,4 +36,11 @@ public class ConnectionController {
         String message = "Successfully " + responseRequest.getStatus().toString().toLowerCase() + " the connection request.";
         return ResponseEntity.ok(new ApiResponse(true, message));
     }
+    // ... inside ConnectionController ...
+
+// --- ADD THIS NEW ENDPOINT ---
+@GetMapping("/requests/pending")
+public ResponseEntity<List<ConnectionResponse>> getPendingRequests() {
+    return ResponseEntity.ok(connectionService.getPendingRequests());
+}
 }

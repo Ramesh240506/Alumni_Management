@@ -4,6 +4,7 @@ import AlumniMap from '../components/network/AlumniMap';
 import AlumniCard from '../components/network/AlumniCard';
 import { getNetworkAlumni } from '../api/alumniService';
 import Spinner from '../components/ui/Spinner';
+import SearchFilter from '../components/network/SearchFilter'; // <-- NEW IMPORT
 
 const NetworkPage = () => {
   const [alumni, setAlumni] = useState([]);
@@ -12,6 +13,7 @@ const NetworkPage = () => {
   useEffect(() => {
     const fetchAlumni = async () => {
       try {
+        // Using mocked data for now
         const data = await getNetworkAlumni();
         setAlumni(data);
       } catch (error) {
@@ -29,8 +31,11 @@ const NetworkPage = () => {
       {loading ? <Spinner /> : (
         <>
           <AlumniMap alumni={alumni} />
+          
           <h2 className="text-2xl font-bold mt-12 mb-6">Directory</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <SearchFilter /> {/* <-- ADDED SEARCH/FILTER BAR */}
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
             {alumni.map(alum => <AlumniCard key={alum.alumniUserId} alumnus={alum} />)}
           </div>
         </>

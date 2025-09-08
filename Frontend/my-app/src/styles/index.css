@@ -1,1 +1,21 @@
 
+/* src/styles/index.css */
+
+/* This file will be where your Tailwind build process outputs the final CSS.
+   For create-react-app, you can simply import the tailwind.css file. */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Or if you are using a build step, you might just import the output file */
+/* @import './output.css'; */
+
+/* Add this if you don't have it already for the line-clamp utility */
+@layer utilities {
+    .line-clamp-3 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+}

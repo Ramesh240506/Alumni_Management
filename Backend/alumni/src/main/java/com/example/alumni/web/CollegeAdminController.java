@@ -1,7 +1,7 @@
 package com.example.alumni.web;
 
-import com.example.alumni.dto.AcademicRecordDto;
 import com.example.alumni.dto.ApiResponse;
+import com.example.alumni.dto.WorkExperienceResponse; // <-- UPDATED IMPORT
 import com.example.alumni.service.CollegeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +17,12 @@ public class CollegeAdminController {
     private final CollegeService collegeService;
 
     @GetMapping("/verifications/pending")
-    public ResponseEntity<List<AcademicRecordDto>> getPendingVerifications() {
+    // --- THIS IS THE FIX ---
+    public ResponseEntity<List<WorkExperienceResponse>> getPendingVerifications() {
         // Requires COLLEGE_ADMIN role
         return ResponseEntity.ok(collegeService.getPendingVerifications());
     }
+    // --- END OF FIX ---
 
     @PostMapping("/verifications/{recordId}/approve")
     public ResponseEntity<ApiResponse> approveRecord(@PathVariable String recordId) {

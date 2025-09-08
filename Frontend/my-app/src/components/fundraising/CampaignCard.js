@@ -1,15 +1,15 @@
-
 import React from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 
-const CampaignCard = ({ campaign }) => {
+// The card now accepts an onDonateClick prop
+const CampaignCard = ({ campaign, onDonateClick }) => {
   const percentage = campaign.goalAmount > 0 ? (campaign.currentAmount / campaign.goalAmount) * 100 : 0;
 
   return (
     <Card>
       <h2 className="text-xl font-bold">{campaign.title}</h2>
-      <p className="text-gray-600 mt-2">{campaign.description}</p>
+      <p className="text-gray-600 mt-2 line-clamp-3">{campaign.description}</p>
       <div className="mt-4">
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${Math.min(percentage, 100)}%` }}></div>
@@ -20,7 +20,8 @@ const CampaignCard = ({ campaign }) => {
         </div>
       </div>
       <div className="mt-6">
-        <Button className="w-full">Donate Now</Button>
+        {/* The button now calls the handler passed from the parent page */}
+        <Button onClick={onDonateClick} className="w-full">Donate Now</Button>
       </div>
     </Card>
   );

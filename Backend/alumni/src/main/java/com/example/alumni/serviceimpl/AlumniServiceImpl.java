@@ -1,5 +1,6 @@
 package com.example.alumni.serviceimpl;
 
+import com.example.alumni.dto.AlumniNetworkResponse;
 import com.example.alumni.dto.AlumniProfileRequest;
 import com.example.alumni.dto.AlumniProfileResponse;
 import com.example.alumni.dto.DigitalIdResponse;
@@ -133,4 +134,32 @@ public class AlumniServiceImpl implements AlumniService {
                 .campaign(campaignInfo)
                 .build();
     }
+
+    // --- ADD THIS NEW METHOD ---
+public List<AlumniNetworkResponse> getAlumniNetwork() {
+    User currentUser = getCurrentUser();
+    String collegeId = currentUser.getAlumniProfile().getCollege().getCollegeId();
+
+    List<AlumniProfile> network = alumniProfileRepository.findByCollege_CollegeIdAndAlumniUserIdNot(collegeId, currentUser.getUserId());
+
+    return network.stream()
+            .map(this::mapToAlumniNetworkResponse)
+            .collect(Collectors.toList());
+}
+
+// --- ADD THIS NEW HELPER METHOD ---
+private AlumniNetworkResponse mapToAlumniNetworkResponse(AlumniProfile profile) {
+    // Mocked lat/lng for demonstration. In a real app, this would come from the database.
+    double lat = (Math.random() * (40.0 - 10.0)) + 10.0; // Random lat for variety
+    double lng = (Math.random() * (100.0 - 70.0)) + 70.0; // Random lng for variety
+
+    return AlumniNetworkResponse.builder()
+            .alumniUserId(profile.getAlumniUserId())
+            .firstName(profile.getFirstName())
+            .lastName(profile.getLastName())
+            .currentCity(profile.getCurrentCity()) // Assumes currentCity field exists
+            .lat(lat)
+            .lng(lng)
+            .build();
+}
 }

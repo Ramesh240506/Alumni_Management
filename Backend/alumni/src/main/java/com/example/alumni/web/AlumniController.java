@@ -1,5 +1,6 @@
 package com.example.alumni.web;
 
+import com.example.alumni.dto.AlumniNetworkResponse;
 import com.example.alumni.dto.AlumniProfileRequest;
 import com.example.alumni.dto.AlumniProfileResponse;
 import com.example.alumni.dto.DigitalIdResponse;
@@ -42,4 +43,11 @@ public class AlumniController {
     public ResponseEntity<List<DonationResponse>> getDonationHistory() {
         return ResponseEntity.ok(alumniService.getDonationHistoryForCurrentUser());
     }
+    // ... inside AlumniController ...
+
+// --- ADD THIS NEW ENDPOINT ---
+@GetMapping("/network")
+public ResponseEntity<List<AlumniNetworkResponse>> getAlumniNetwork() {
+    return ResponseEntity.ok(alumniService.getAlumniNetwork());
+}
 }

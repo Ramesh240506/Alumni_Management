@@ -14,32 +14,57 @@ const DonationsPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    // ... fetchCampaigns logic ...
+    const fetchCampaigns = async () => {
+      try {
+        const data = await getCampaigns();
+        setCampaigns(data);
+      } catch (error) {
+        console.error("Failed to fetch campaigns", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCampaigns();
   }, []);
 
   const handleDonateSuccess = (message) => {
     setSuccessMessage(message);
-    setSelectedCampaign(null);
+    setSelectedCampaign(null); // Close the modal on success
     setTimeout(() => setSuccessMessage(''), 4000);
-  }
+  };
 
   return (
     <Layout>
       <h1 className="text-3xl font-bold mb-6">Give Back</h1>
+      <p className="text-lg text-gray-600 mb-8">Support your alma mater by contributing to these active campaigns.</p>
       {successMessage && <Alert message={successMessage} type="success" className="mb-6" />}
-      {/* ... loading and campaign mapping logic ... */}
       
-      {/* This is a simple way to handle the donation form in a modal */}
-      {selectedCampaign && (
-        <Modal isOpen={!!selectedCampaign} onClose={() => setSelectedCampaign(null)}>
-          <h2 className="text-2xl font-bold mb-4">Donate to {selectedCampaign.title}</h2>
-          <DonationForm campaignId={selectedCampaign.campaignId} onSuccess={handleDonateSuccess} />
-        </Modal>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {campaigns.map(campaign => (
+            // Pass the onClick handler to the card
+            <CampaignCard 
+              key={campaign.campaignId} 
+              campaign={campaign} 
+              onDonateClick={() => setSelectedCampaign(campaign)} 
+            />
+          ))}
+        </div>
       )}
+
+      {/* The Modal for the donation form */}
+      <Modal isOpen={!!selectedCampaign} onClose={() => setSelectedCampaign(null)}>
+        {selectedCampaign && (
+            <>
+                <h2 className="text-2xl font-bold mb-4">Donate to {selectedCampaign.title}</h2>
+                <DonationForm campaignId={selectedCampaign.campaignId} onSuccess={handleDonateSuccess} />
+            </>
+        )}
+      </Modal>
     </Layout>
   );
 };
 
-// Note: You need to update the CampaignCard component to call setSelectedCampaign on button click
-// Example in CampaignCard: <Button onClick={() => onDonateClick(campaign)}>Donate Now</Button>
 export default DonationsPage;
